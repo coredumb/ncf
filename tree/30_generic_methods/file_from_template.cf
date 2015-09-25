@@ -21,12 +21,15 @@
 #
 # @parameter source_template Source file containing a template to be expanded
 # @parameter destination     Destination file
+# @parameter mode Mode to enforce (like "640")
+# @parameter owner Owner to enforce (like "root")
+# @parameter group Group to enforce (like "wheel")
 #
 # @class_prefix file_from_template
 # @class_parameter destination
 # This bundle will define a class file_from_template_${destination}_{kept,repaired,not_ok,ok,reached}
 
-bundle agent file_from_template(source_template, destination)
+bundle agent file_from_template(source_template, destination, mode, owner, group)
 {
   vars:
     "old_class_prefix" string => canonify("file_from_template_${destination}");
@@ -41,6 +44,7 @@ bundle agent file_from_template(source_template, destination)
     "${destination}"
       create          => "true",
       edit_template   => "${source_template}",
+      perms           => mog("${mode}", "${owner}", "${group}"),
       ifvarclass      => "template_exists",
       classes         => classes_generic_two("${old_class_prefix}", "${class_prefix}");
 
