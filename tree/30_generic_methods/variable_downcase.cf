@@ -1,0 +1,32 @@
+# @name Variable downcase
+# @description Returns a lower cased string
+#
+# @parameter variable_name   The variable to define, the full name will be variable_downcase.variable_name
+# @parameter value           The variable content
+# 
+# 
+# This bundle will define a class variable_downcase_${variable_name}_{kept,repaired,not_ok,ok,reached}
+# 
+# To use the generated variable, you must use the form ${variable_downcase.variable_name}
+
+bundle agent variable_downcase(variable_name, value)
+{
+  vars:
+      "${variable_name}" string => string_downcase("${value}");
+
+  classes:
+     "variable_downcase_defined" expression => isvariable("${variable_name}");
+
+  methods:
+    !variable_downcase_defined::
+      "error"    usebundle => _classes_failure("${old_class_prefix}");
+      "error"    usebundle => _classes_failure("${class_prefix}");
+
+    variable_downcase_defined::
+      "success"  usebundle => _classes_success("${old_class_prefix}");
+      "success"  usebundle => _classes_success("${class_prefix}");
+
+    any::
+      "report"
+        usebundle  => _log("Set the string ${value} as lowercase in variable ${variable.name}", "${old_class_prefix}", "${class_prefix}", @{args});
+}

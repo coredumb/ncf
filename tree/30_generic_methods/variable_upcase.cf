@@ -1,0 +1,32 @@
+# @name Variable upcase
+# @description Returns a uppercased string
+#
+# @parameter variable_name   The variable to define, the full name will be variable_upcase.variable_name
+# @parameter value           The variable content
+# 
+# 
+# This bundle will define a class variable_upcase_${variable_name}_{kept,repaired,not_ok,ok,reached}
+# 
+# To use the generated variable, you must use the form ${variable_upcase.variable_name}
+
+bundle agent variable_upcase(variable_name, value)
+{
+  vars:
+      "${variable_name}" string => string_upcase("${value}");
+
+  classes:
+     "variable_upcase_defined" expression => isvariable("${variable_name}");
+
+  methods:
+    !variable_upcase_defined::
+      "error"    usebundle => _classes_failure("${old_class_prefix}");
+      "error"    usebundle => _classes_failure("${class_prefix}");
+
+    variable_upcase_defined::
+      "success"  usebundle => _classes_success("${old_class_prefix}");
+      "success"  usebundle => _classes_success("${class_prefix}");
+
+    any::
+      "report"
+        usebundle  => _log("Set the string ${value} as uppercase in variable ${variable.name}", "${old_class_prefix}", "${class_prefix}", @{args});
+}
